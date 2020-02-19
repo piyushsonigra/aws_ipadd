@@ -11,7 +11,7 @@ parser = argparse.ArgumentParser(description='Add your current public ip into AW
 parser.add_argument('profile_name', help='ipadd profile name')
 args = parser.parse_args()
 
-config_file = "{}/.ipadd/ipadd".format(os.environ['HOME'])
+config_file = "{}/.aws_ipadd/aws_ipadd".format(os.environ['HOME'])
 config = configparser.ConfigParser()
 config.sections()
 config.read(config_file)
