@@ -53,7 +53,7 @@ def revoke_ip_permission(security_group_id, ip):
                 'IpRanges': [{'CidrIp': ip}]
             }])
 
-public_ip = requests.get('https://ipinfo.io/ip').text.strip() + '/32'
+public_ip = requests.get('https://checkip.amazonaws.com').text.strip() + '/32'
 
 try:
     security_group = session.describe_security_groups(GroupIds=[security_group_id])
@@ -67,11 +67,7 @@ except ClientError as e:
     print(e)
     sys.exit()
 
-try:
-    security_group_rule = [security_group_rule for security_group_rule in security_group_rules if security_group_rule['FromPort'] == port]
-except Exception as e:
-    print("No rules exist for {}.".format(port))
-    sys.exit()
+security_group_rule = [security_group_rule for security_group_rule in security_group_rules if 'FromPort' in security_group_rule]
 
 if len(security_group_rule) == 0:
     try:

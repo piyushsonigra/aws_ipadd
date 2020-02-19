@@ -107,3 +107,7 @@ Run the aws_ipadd command with aws_ipadd profile.
 ## Licence
 
 - [aws_ipadd](https://github.com/piyushsonigra/aws_ipadd/blob/master/LICENSE)
+
+## Thanks
+
+- [amazonaws_checkip](https://checkip.amazonaws.com)
