@@ -1,0 +1,103 @@
+#!/usr/local/bin/python3
+from boto3.session import Session
+from botocore.exceptions import ProfileNotFound,ClientError
+import requests
+import os
+import argparse
+import configparser
+import sys
+
+parser = argparse.ArgumentParser(description='Add your current public ip into AWS security group')
+parser.add_argument('profile_name', help='ipadd profile name')
+args = parser.parse_args()
+
+config_file = "{}/.ipadd/ipadd".format(os.environ['HOME'])
+config = configparser.ConfigParser()
+config.sections()
+config.read(config_file)
+
+profile_name = args.profile_name
+if not profile_name in config:
+    print("Profile_name \"" + profile_name + "\" doesn't exist, please check \"" + config_file + "\" file.")
+    sys.exit()
+
+config = config[profile_name]
+rule_name = config['rule_name']
+port = int(config['port'])
+security_group_id = config['security_group_id']
+aws_profile = config['aws_profile']
+region_name = config['region_name']
+
+session = Session(profile_name=aws_profile,region_name=region_name)
+session = session.client('ec2')
+
+def allow_ip_permission(security_group_id, ip):
+    session.authorize_security_group_ingress(
+        GroupId=security_group_id,
+        IpPermissions=[
+            {
+                'FromPort': port,
+                'ToPort': port,
+                'IpProtocol': 'tcp',
+                'IpRanges': [{'CidrIp': ip, 'Description': rule_name}]
+            }])
+
+def revoke_ip_permission(security_group_id, ip):
+    session.revoke_security_group_ingress(
+        GroupId=security_group_id,
+        IpPermissions=[
+            {
+                'FromPort': port,
+                'ToPort': port,
+                'IpProtocol': 'tcp',
+                'IpRanges': [{'CidrIp': ip}]
+            }])
+
+public_ip = requests.get('https://ipinfo.io/ip').text.strip() + '/32'
+
+try:
+    security_group = session.describe_security_groups(GroupIds=[security_group_id])
+except ClientError as e:
+    print(e)
+    sys.exit()
+
+try:
+   security_group_rules = security_group['SecurityGroups'][0]['IpPermissions']
+except ClientError as e:
+    print(e)
+    sys.exit()
+
+try:
+    security_group_rule = [security_group_rule for security_group_rule in security_group_rules if security_group_rule['FromPort'] == port]
+except Exception as e:
+    print("No rules exist for " + port + ".")
+    sys.exit()
+
+if len(security_group_rule) == 0:
+    try:
+        allow_ip_permission(security_group_id, public_ip)
+        print("Your IP {} and Port {} is whitelisted successfully.".format(public_ip, port))
+        sys.exit()
+    except Exception as e:
+        e = str(e)
+        print("message: " + e[e.index(':') + 2:])
+        sys.exit()
+
+current_public_ip = [ip for ip in security_group_rule[0]['IpRanges'] if 'Description' in ip]
+security_group_rule_name = [sg_rule_name for sg_rule_name in current_public_ip if sg_rule_name['Description'] == rule_name]
+
+if len(security_group_rule_name) != 0 and security_group_rule_name[0]['CidrIp'] != public_ip:
+    print("Modifying existing rule...")
+    exist_ip = security_group_rule_name[0]['CidrIp']
+    try:
+        print("Removing old whitelisted IP '{}'.".format(exist_ip))
+        revoke_ip_permission(security_group_id, exist_ip)
+        print("Whitelisting new IP '{}'.".format(public_ip))
+        allow_ip_permission(security_group_id, public_ip)
+        print("Rule successfully updated!")
+        sys.exit()
+    except Exception as e:
+        e = str(e)
+        print("message: " + e[e.index(':') + 2:])
+else:
+    print("Your IP {} and Port {} is already whitelisted.".format(public_ip, port))
