@@ -53,36 +53,37 @@ def revoke_ip_permission(security_group_id, ip):
                 'IpRanges': [{'CidrIp': ip}]
             }])
 
+def create_rule(security_group_id, public_ip):
+    try:
+        allow_ip_permission(security_group_id, public_ip)
+        print("Successful! Your IP {} and Port {} is whitelisted.".format(public_ip, port))
+    except Exception as error:
+        error = str(error)
+        print(error[error.index(':') + 2:])
+
 public_ip = requests.get('https://checkip.amazonaws.com').text.strip() + '/32'
 
 try:
     security_group = session.describe_security_groups(GroupIds=[security_group_id])
-except ClientError as e:
-    print(e)
+except ClientError as error:
+    print(eerror)
     sys.exit()
 
 try:
    security_group_rules = security_group['SecurityGroups'][0]['IpPermissions']
-except ClientError as e:
-    print(e)
+except ClientError as eerror:
+    print(error)
     sys.exit()
 
-security_group_rule = [security_group_rule for security_group_rule in security_group_rules if 'FromPort' in security_group_rule]
-
+security_group_rule = [security_group_rule for security_group_rule in security_group_rules if 'FromPort' in security_group_rule and security_group_rule['FromPort'] == port]
 if len(security_group_rule) == 0:
-    try:
-        allow_ip_permission(security_group_id, public_ip)
-        print("Your IP {} and Port {} is whitelisted successfully.".format(public_ip, port))
-        sys.exit()
-    except Exception as e:
-        e = str(e)
-        print("message: " + e[e.index(':') + 2:])
-        sys.exit()
+    create_rule(security_group_id, public_ip)
+    sys.exit()
 
-current_public_ip = [ip for ip in security_group_rule[0]['IpRanges'] if 'Description' in ip]
-security_group_rule_name = [sg_rule_name for sg_rule_name in current_public_ip if sg_rule_name['Description'] == rule_name]
+current_public_ip = [ip for ip in security_group_rule[0]['IpRanges'] if ip['CidrIp'] != public_ip]
+security_group_rule_name = [sg_rule_name for sg_rule_name in current_public_ip if 'Description' in sg_rule_name and sg_rule_name['Description'] == rule_name]
 
-if len(security_group_rule_name) != 0 and security_group_rule_name[0]['CidrIp'] != public_ip:
+if len(security_group_rule_name) != 0:
     print("Modifying existing rule...")
     exist_ip = security_group_rule_name[0]['CidrIp']
     try:
@@ -91,9 +92,8 @@ if len(security_group_rule_name) != 0 and security_group_rule_name[0]['CidrIp'] 
         print("Whitelisting new IP '{}'.".format(public_ip))
         allow_ip_permission(security_group_id, public_ip)
         print("Rule successfully updated!")
-        sys.exit()
-    except Exception as e:
-        e = str(e)
-        print("message: " + e[e.index(':') + 2:])
+    except Exception as error:
+        error = str(error)
+        print(error[error.index(':') + 2:])
 else:
-    print("Your IP {} and Port {} is already whitelisted.".format(public_ip, port))
+    create_rule(security_group_id, public_ip)
