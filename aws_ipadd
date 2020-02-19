@@ -70,7 +70,7 @@ except ClientError as e:
 try:
     security_group_rule = [security_group_rule for security_group_rule in security_group_rules if security_group_rule['FromPort'] == port]
 except Exception as e:
-    print("No rules exist for " + port + ".")
+    print("No rules exist for {}.".format(port))
     sys.exit()
 
 if len(security_group_rule) == 0:

@@ -3,6 +3,7 @@
 
 # aws_ipadd
 
+Whitelist inbound IP and Port in AWS security group and Manage security group rule with `aws_ipadd` command.
 
 ## OS Support
 
