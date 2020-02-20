@@ -3,7 +3,8 @@
 
 # aws_ipadd
 
-Whitelist inbound IP and Port in AWS security group and Manage security group rule with `aws_ipadd` command.
+Add or Whitelist inbound IP and Port in AWS security group and manage AWS security group rules with `aws_ipadd` command.
+It makes easy to add your public ip into security group to access AWS resource. Whenever your public ip change, You can easily update new public ip into security group and `aws_ipadd` command will manage security group rule for you. It's very helpful when you are accessing aws resources that needs public ip whitelisting in security group to access and your public ip is continously changed.
 
 ## OS Support
 
