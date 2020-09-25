@@ -24,6 +24,7 @@ if not profile_name in config:
 config = config[profile_name]
 rule_name = config['rule_name']
 port = int(config['port'])
+protocol = config['protocol'] or 'tcp'
 security_group_id = config['security_group_id']
 aws_profile = config['aws_profile']
 region_name = config['region_name']
@@ -38,7 +39,7 @@ def allow_ip_permission(security_group_id, ip):
             {
                 'FromPort': port,
                 'ToPort': port,
-                'IpProtocol': 'tcp',
+                'IpProtocol': protocol,
                 'IpRanges': [{'CidrIp': ip, 'Description': rule_name}]
             }])
 
@@ -49,7 +50,7 @@ def revoke_ip_permission(security_group_id, ip):
             {
                 'FromPort': port,
                 'ToPort': port,
-                'IpProtocol': 'tcp',
+                'IpProtocol': protocol,
                 'IpRanges': [{'CidrIp': ip}]
             }])
 
