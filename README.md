@@ -64,6 +64,9 @@ Run below commands to conifgure aws_ipadd command.
   - rule_name:
     AWS security group rule name to identify rule purpose.
 
+  - protocol:
+    You can define protocol for port TCP or UDP. Default is TCP.
+ 
   - port:
     Network port to whitelist with IP.
 
