@@ -77,6 +77,7 @@ Run below commands to conifgure aws_ipadd command.
   [my_project_ssh]
   aws_profile = my_project
   security_group_id = sg-d26fdre9d
+  protocol = TCP
   port = 22
   rule_name = my_office_ssh
   region_name = us-east-1
@@ -84,6 +85,7 @@ Run below commands to conifgure aws_ipadd command.
   [my_project_mysql]
   aws_profile = my_project
   security_group_id = sg-dfg9dwe
+  protocol = TCP
   port = 3306
   rule_name = my_office_mysql
   region_name = us-east-1
