@@ -91,6 +91,14 @@ Run below commands to conifgure aws_ipadd command.
   region_name = us-east-1
   ```
 
+## Feature Update
+
+Now you can run multiple configurations at once. Don't forget to update the config file, with relative configurations. Check config-example.txt file for reference.
+
+  ```console
+  $ aws_ipadd prod test etc.
+  ```
+
 ## Usage
 
 Run the aws_ipadd command with aws_ipadd profile.
