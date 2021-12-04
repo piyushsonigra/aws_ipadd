@@ -13,7 +13,6 @@ parser = argparse.ArgumentParser(description='Add your current public ip into AW
 parser.add_argument('profile_names', metavar='Profile Names', nargs='+', help='ipadd profile name(s)')
 args = parser.parse_args()
 
-# config_file = "./config-example.txt" # Uncomment to test changes with the local config file: config-example.txt
 config_file = "{}/.aws_ipadd/aws_ipadd".format(os.environ['HOME'])
 public_ip = requests.get('https://checkip.amazonaws.com').text.strip() + '/32'
 
@@ -50,7 +49,6 @@ def create_rule(session, security_group_id, public_ip, data):
         print(error[error.index(':') + 2:])
 
 # Loop over profile names
-
 for profile_name in args.profile_names:
     # Reading file for config
     config = configparser.ConfigParser()
@@ -96,7 +94,7 @@ for profile_name in args.profile_names:
         create_rule(session, security_group_id, public_ip, {"port": port, "protocol": protocol, "rule_name": rule_name})
         sys.exit()
 
-    # Create rule if rule not defined
+    # Check rule name
     if len(security_group_rule_name) != 0:
         print("Modifying existing rule...")
         exist_ip = security_group_rule_name[0]['CidrIp']

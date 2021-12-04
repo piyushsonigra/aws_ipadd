@@ -1,3 +1,6 @@
+## Check under configuration section in readme
+## Place it here: /home/{user}/.aws_ipadd
+
 [prod]
 aws_profile = my_project
 security_group_id = sg-d26fdre9d
