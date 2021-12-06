@@ -47,7 +47,7 @@ Run below commands to conifgure aws_ipadd command.
   $ touch ~/.aws_ipadd/aws_ipadd
   ```
 
-  Edit the `~/.aws_ipadd/aws_ipadd` file and add below Informations as shown in sample configuration file.
+  Edit the `~/.aws_ipadd/aws_ipadd` file and add below Informations as shown in sample configuration file. You can also checkout the config-example.txt file in the project for multi profile configuration.
 
   - aws_ipadd profile name in []:
   `my_project_mysql` and `my_project_ssh` is aws_ipadd profiles to identify configuration which security group rule need to update with port, IP, rule_name and security group region for different AWS account profiles.
@@ -108,6 +108,14 @@ Run the aws_ipadd command with aws_ipadd profile.
     Removing old whitelisted IP '12.10.1.14/32'.
     Whitelisting new IP '131.4.10.16/32'.
     Rule successfully updated!
+  ```
+
+### Feature Update
+
+Now you can run multiple profiles/configurations at once. Don't forget to update the config file, with relative configurations. Check config-example.txt file for reference.
+
+  ```console
+  $ aws_ipadd prod test dev stage
   ```
 
 ## Licence
