@@ -1,5 +1,5 @@
 ## Check under configuration section in readme
-## Place it here: /home/{user}/.aws_ipadd
+## Place it here: /home/{user}/.aws_ipadd/aws_ipadd
 
 [prod]
 aws_profile = my_project
