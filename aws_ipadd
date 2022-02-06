@@ -55,11 +55,15 @@ for profile_name in args.profile_names:
     config.sections()
     config.read(config_file)
 
+    print("---------------")
+    print(profile_name)
+    print("---------------")
+
     # Check if config exists for the profile name
     if not profile_name in config:
         print("Profile_name \"" + profile_name + "\" doesn't exist, please check \"" + config_file + "\" file.")
         continue
-    
+
     # Initialising required variables
     config = config[profile_name]
     rule_name = config['rule_name']
@@ -88,7 +92,7 @@ for profile_name in args.profile_names:
 
     current_public_ip = [ip for ip in security_group_rule[0]['IpRanges'] if ip['CidrIp'] != public_ip]
     security_group_rule_name = [sg_rule_name for sg_rule_name in current_public_ip if 'Description' in sg_rule_name and sg_rule_name['Description'] == rule_name]
-    
+
     # Create rule if rule not defined
     if len(security_group_rule) == 0:
         create_rule(session, security_group_id, public_ip, {"port": port, "protocol": protocol, "rule_name": rule_name})
