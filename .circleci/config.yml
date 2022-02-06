@@ -13,6 +13,7 @@ commands:
       - run:
           name: 'Install Packages'
           command: |
+              pip3.6 install wheel
               pip3.6 install -r requirements.txt
       - run:
           name: 'Create Build'

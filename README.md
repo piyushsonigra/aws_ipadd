@@ -66,7 +66,7 @@ Run below commands to conifgure aws_ipadd command.
 
   - protocol:
     You can define protocol for port TCP or UDP. Default is TCP.
- 
+
   - port:
     Network port to whitelist with IP.
 
@@ -108,6 +108,13 @@ Run the aws_ipadd command with aws_ipadd profile.
     Removing old whitelisted IP '12.10.1.14/32'.
     Whitelisting new IP '131.4.10.16/32'.
     Rule successfully updated!
+  ```
+
+  You can also configure cronjob to check and keep whitelisted your Public IP in security groups.
+
+  ```console
+  # Run every hour
+  $ * */1 * * * /usr/local/bin/aws_ipadd project_ssh project_rdp
   ```
 
 ### Feature Update
