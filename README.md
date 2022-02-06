@@ -38,13 +38,13 @@ Run below commands to conifgure aws_ipadd command.
   Create directory `~/.aws_ipadd` at your home directory.
 
   ```console
-  $ mkdir ~/.aws_ipadd
+  mkdir ~/.aws_ipadd
   ```
 
   Create configuration file `aws_ipadd` inside `~/.aws_ipadd`.
 
   ```console
-  $ touch ~/.aws_ipadd/aws_ipadd
+  touch ~/.aws_ipadd/aws_ipadd
   ```
 
   Edit the `~/.aws_ipadd/aws_ipadd` file and add below Informations as shown in sample configuration file. You can also checkout the config-example.txt file in the project for multi profile configuration.
@@ -65,7 +65,7 @@ Run below commands to conifgure aws_ipadd command.
     AWS security group rule name to identify rule purpose.
 
   - protocol:
-    You can define protocol for port TCP or UDP. Default is TCP.
+    Port protocol name i.e TCP, UDP or valid port protocol that security group accept.
 
   - port:
     Network port to whitelist with IP.
@@ -104,17 +104,20 @@ Run the aws_ipadd command with aws_ipadd profile.
 
   ```console
   $ aws_ipadd my_project_ssh
+    ---------------
+    my_project_ssh
+    ---------------
     Modifying existing rule...
     Removing old whitelisted IP '12.10.1.14/32'.
     Whitelisting new IP '131.4.10.16/32'.
     Rule successfully updated!
   ```
 
-  You can also configure cronjob to check and keep whitelisted your Public IP in security groups.
+  You can also configure cronjob to check and keep whitelisted your Public IP in one or more security groups.
 
   ```console
   # Run every hour
-  $ * */1 * * * /usr/local/bin/aws_ipadd project_ssh project_rdp
+  * */1 * * * /usr/local/bin/aws_ipadd project_ssh project_rdp
   ```
 
 ### Feature Update

@@ -68,7 +68,7 @@ for profile_name in args.profile_names:
     config = config[profile_name]
     rule_name = config['rule_name']
     port = int(config['port'])
-    protocol = config['protocol'] or 'tcp'
+    protocol = config['protocol']
     security_group_id = config['security_group_id']
     aws_profile = config['aws_profile']
     region_name = config['region_name']
