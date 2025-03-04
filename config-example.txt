@@ -1,18 +1,26 @@
 ## Check under configuration section in readme
-## Place it here: /home/{user}/.aws_ipadd/aws_ipadd
+## create file at /home/{user}/.aws_ipadd/aws_ipadd or you can set environment variable for custom config file path using CUSTOM_AWS_IPADD_CONFIG_FILE=./aws_ipadd
 
-[prod]
-aws_profile = my_project
+[project-ssh]
+aws_profile = aws_project_profile
 security_group_id = sg-d26fdre9d
 protocol = TCP
 port = 22
-rule_name = my_office_ssh
+rule_name = user_name_ssh
 region_name = us-east-1
 
-[test]
+[ftp]
 aws_profile = my_project
-security_group_id = sg-dfg9dwe
+security_group_id = sg-d26fdre9d
 protocol = TCP
-port = 3306
-rule_name = my_office_mysql
+from_port = 20
+to_port = 21
+rule_name = office_ftp
 region_name = us-east-1
+
+[project-all-traffic]
+aws_profile = project
+security_group_id = sg-dfg9dwe
+protocol = all
+rule_name = all_traffic_from_home
+region_name = us-west-2
