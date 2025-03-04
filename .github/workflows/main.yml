@@ -24,11 +24,6 @@ jobs:
       - name: Download Dependencies
         run: go mod download
 
-      - name: Build
-        run: |
-          make build
-          ls -lah dist/   # Debugging: List files in dist/
-
       - name: Archive Build Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -50,18 +45,14 @@ jobs:
           name: aws_ipadd-artifacts
           path: ./
 
-      - name: Build
-        run: |
-          ls -lah   # Debugging: List files in dist/
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/aws_ipadd_darwin_amd64.tar.gz
-            dist/aws_ipadd_darwin_arm64.tar.gz
-            dist/aws_ipadd_linux_amd64.tar.gz
-            dist/aws_ipadd_linux_arm64.tar.gz
+            aws_ipadd_darwin_amd64.tar.gz
+            aws_ipadd_darwin_arm64.tar.gz
+            aws_ipadd_linux_amd64.tar.gz
+            aws_ipadd_linux_arm64.tar.gz
           name: "Release ${{ github.ref_name }}"
           tag_name: "${{ github.ref_name }}"
           fail_on_unmatched_files: true
