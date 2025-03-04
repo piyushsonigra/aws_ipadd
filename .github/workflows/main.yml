@@ -45,7 +45,7 @@ jobs:
       - name: Download Build Artifact
         uses: actions/download-artifact@v4
         with:
-          name: aws_ipadd-binary
+          name: aws_ipadd-artifacts
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
