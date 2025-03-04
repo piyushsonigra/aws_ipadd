@@ -48,10 +48,11 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: aws_ipadd-artifacts
+          path: ./
 
       - name: Build
         run: |
-          ls -lah dist/   # Debugging: List files in dist/
+          ls -lah   # Debugging: List files in dist/
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -63,5 +64,6 @@ jobs:
             dist/aws_ipadd_linux_arm64.tar.gz
           name: "Release ${{ github.ref_name }}"
           tag_name: "${{ github.ref_name }}"
+          fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
