@@ -10,10 +10,11 @@ build: clean
 	@for platform in $(PLATFORMS); do \
 		OS=$$(echo $$platform | cut -d'/' -f1); \
 		ARCH=$$(echo $$platform | cut -d'/' -f2); \
-		OUTPUT_FILE=$(BIN_NAME)_$${OS}_$${ARCH}; \
+		OUTPUT_FILE=$(BIN_NAME); \
+		ARTF_FILE=$(BIN_NAME)_$${OS}_$${ARCH}; \
 		echo "Building $$OUTPUT_FILE..."; \
 		GOOS=$$OS GOARCH=$$ARCH go build -o $(BUILD_DIR)/$$OUTPUT_FILE .; \
-		tar -czf $(BUILD_DIR)/$$OUTPUT_FILE.tar.gz -C $(BUILD_DIR) $$OUTPUT_FILE; \
+		tar -czf $(BUILD_DIR)/$$ARTF_FILE.tar.gz -C $(BUILD_DIR) $$OUTPUT_FILE; \
 		rm -f $(BUILD_DIR)/$$OUTPUT_FILE; \
 	done
 	@echo "Build complete. Artifacts are in $(BUILD_DIR)/"

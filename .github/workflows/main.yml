@@ -33,6 +33,7 @@ jobs:
         with:
           name: aws_ipadd-artifacts
           path: dist/
+          if-no-files-found: error
 
   release:
     if: github.ref_type == 'tag'

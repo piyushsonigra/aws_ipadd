@@ -37,28 +37,32 @@ The tool automatically detects your current public IP and updates AWS security g
 ### Linux (x86_64/AMD64)
 
 ```console
-wget -c https://github.com/piyushsonigra/aws_ipadd/releases/latest/download/aws_ipadd_linux_amd64.tar.gz -O - | tar -xz -C /usr/local/bin/
+curl -s -L https://github.com/piyushsonigra/aws_ipadd/releases/latest/download/aws_ipadd_darwin_amd64.tar.gz | tar -xz -C /usr/local/bin
 ```
 
 ### Linux (ARM64)
 
 ```console
-wget -c https://github.com/piyushsonigra/aws_ipadd/releases/latest/download/aws_ipadd_linux_arm64.tar.gz -O - | tar -xz -C /usr/local/bin/
+curl -s -L https://github.com/piyushsonigra/aws_ipadd/releases/latest/download/aws_ipadd_linux_arm64.tar.gz | tar -xz -C /usr/local/bin/
 ```
 
 ### macOS (Intel x86_64)
 
 ```console
-wget -c https://github.com/piyushsonigra/aws_ipadd/releases/latest/download/aws_ipadd_darwin_amd64.tar.gz -O - | tar -xz -C /usr/local/bin/
+curl -s -L https://github.com/piyushsonigra/aws_ipadd/releases/latest/download/aws_ipadd_darwin_amd64.tar.gz | tar -xz -C /usr/local/bin/
 ```
 
 ### macOS (Apple Silicon ARM64)
 
 ```console
-wget -c https://github.com/piyushsonigra/aws_ipadd/releases/latest/download/aws_ipadd_darwin_arm64.tar.gz -O - | tar -xz -C /usr/local/bin/
+curl -s -L https://github.com/piyushsonigra/aws_ipadd/releases/latest/download/aws_ipadd_darwin_arm64.tar.gz | tar -xz -C /usr/local/bin/
 ```
 
-> **Note:** If you encounter permission errors, run the command with `sudo`.
+> **Note:** If you encounter permission errors, run the command with `sudo` for tar operation as shown example below.
+
+```console
+curl -s -L https://github.com/piyushsonigra/aws_ipadd/releases/latest/download/aws_ipadd_darwin_arm64.tar.gz | sudo tar -xz -C /usr/local/bin/
+```
 
 ## ⚙️ Configuration
 
