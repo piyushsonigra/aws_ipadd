@@ -130,3 +130,7 @@ virtualenv/
 # Package File
 *.zip
 *.tar.gz
+aws_ipadd**
+
+# build folder
+dist
