@@ -25,7 +25,9 @@ jobs:
         run: go mod download
 
       - name: Build
-        run:  make build
+        run: |
+          make build
+          ls -lah dist/   # Debugging: List files in dist/
 
       - name: Archive Build Artifact
         uses: actions/upload-artifact@v4
@@ -46,6 +48,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: aws_ipadd-artifacts
+
+      - name: Build
+        run: |
+          ls -lah dist/   # Debugging: List files in dist/
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
