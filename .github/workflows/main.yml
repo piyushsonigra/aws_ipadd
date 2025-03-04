@@ -24,6 +24,10 @@ jobs:
       - name: Download Dependencies
         run: go mod download
 
+      - name: Build
+        run: |
+          make build
+
       - name: Archive Build Artifact
         uses: actions/upload-artifact@v4
         with:
