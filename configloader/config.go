@@ -5,7 +5,9 @@ import (
 	"aws_ipadd/publicip"
 	"errors"
 	"fmt"
+	"slices"
 	"strconv"
+	"strings"
 
 	"gopkg.in/ini.v1"
 )
@@ -168,12 +170,24 @@ func getIPvalue(args *cliargs.Args) (string, error) {
 }
 
 func getProtocolValue(section *ini.Section, args *cliargs.Args) (string, error) {
-	if section.Key("protocol").String() == "" && args.Protocol == "" {
-		return "", errors.New("protocol value is missing in configfile and cli arguments")
+	// Extract protocol from config file and CLI arguments, prioritizing CLI input
+	protocol := strings.ToLower(args.Protocol)
+	if protocol == "" {
+		protocol = strings.ToLower(section.Key("protocol").String())
 	}
-	protocol := section.Key("protocol").String()
-	if args.Protocol != "" {
-		return args.Protocol, nil
+
+	// Validate if protocol is provided
+	if protocol == "" {
+		return "", errors.New("protocol value is missing in both config file and CLI arguments")
 	}
+
+	// Define allowed protocols
+	allowedProtocols := []string{"tcp", "udp", "all"}
+
+	// Check if the provided protocol is valid
+	if !slices.Contains(allowedProtocols, protocol) {
+		return "", fmt.Errorf("invalid protocol: %s, valid values are: tcp, udp, all", protocol)
+	}
+
 	return protocol, nil
 }
