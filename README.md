@@ -1,6 +1,6 @@
 # aws_ipadd
 
-[![Actions Status](https://github.com/piyushsonigra/aws_ipadd/workflows/Build%20&%20Release/badge.svg)](https://github.com/piyushsonigra/aws_ipadd/actions)
+[![Build and Release aws_ipadd](https://github.com/piyushsonigra/aws_ipadd/actions/workflows/main.yml/badge.svg)](https://github.com/piyushsonigra/aws_ipadd/actions/workflows/main.yml)
 
 > **Effortlessly manage AWS security group rules with a single command**
 
