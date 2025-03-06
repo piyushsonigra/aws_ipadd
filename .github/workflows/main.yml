@@ -29,6 +29,7 @@ jobs:
           make build
 
       - name: Archive Build Artifact
+        if: github.ref_type == 'tag'
         uses: actions/upload-artifact@v4
         with:
           name: aws_ipadd-artifacts
