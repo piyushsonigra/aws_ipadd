@@ -169,6 +169,7 @@ func getIPvalue(args *cliargs.Args) (string, error) {
 	return ip, nil
 }
 
+// Get protocol value
 func getProtocolValue(section *ini.Section, args *cliargs.Args) (string, error) {
 	// Extract protocol from config file and CLI arguments, prioritizing CLI input
 	protocol := strings.ToLower(args.Protocol)

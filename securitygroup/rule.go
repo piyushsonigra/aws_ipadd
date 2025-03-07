@@ -13,54 +13,31 @@ import (
 
 // Processes security group rules
 func ProcessRule(profile string, ruleConfig *configloader.SecurityGroupRule) (string, error) {
-	fmt.Printf("---------------\n%v\n---------------\n", profile)
+	fmt.Printf("---------------\n%s\n---------------\nSecurityGroupID: %s\n", profile, ruleConfig.SecurityGroupID)
 
-	// Load AWS SDK configuration with specified profile and region
-	awsCfg, err := config.LoadDefaultConfig(context.TODO(),
-		config.WithSharedConfigProfile(ruleConfig.AWSProfile),
-		config.WithRegion(ruleConfig.Region),
-	)
+	// Get security group rules
+	ec2Client, securityGroupRules, err := getSecurityGroupRules(ruleConfig)
 	if err != nil {
 		return "", err
 	}
 
-	// Create EC2 client and retrieve security group details
-	ec2Client := ec2.NewFromConfig(awsCfg)
-	describeInput := &ec2.DescribeSecurityGroupsInput{
-		GroupIds: []string{ruleConfig.SecurityGroupID},
-	}
-	securityGroup, err := ec2Client.DescribeSecurityGroups(context.TODO(), describeInput)
+	// Get valid allowed rules
+	validRules, err := getValidRules(ruleConfig, &securityGroupRules)
 	if err != nil {
 		return "", err
 	}
-	securityRules := securityGroup.SecurityGroups[0].IpPermissions
 
-	// Filter security rules for the specified port and protocol
-	var matchingRules []types.IpPermission
+	// findMatchingRule searches for matching rules by IP or rule name
+	ruleIPMatched, ruleNameMatched, matchingRule := getMatchingRule(ruleConfig, &validRules)
 
-	for _, rule := range securityRules {
-		protocol := derefString(rule.IpProtocol) // Convert *string to string safely
-
-		switch {
-		case protocol == "-1":
-			// "all" protocol means all traffic, represented by "-1" in AWS security rules
-			if ruleConfig.Protocol == "all" {
-				matchingRules = append(matchingRules, rule)
-			}
-
-		case protocol == "tcp" || protocol == "udp":
-			// Validate TCP and UDP rules against ruleConfig
-			if protocol == ruleConfig.Protocol &&
-				derefInt(rule.FromPort) == ruleConfig.FromPort &&
-				derefInt(rule.ToPort) == ruleConfig.ToPort {
-
-				matchingRules = append(matchingRules, rule)
-			}
-
-		default:
-			// Handle unsupported protocols
-			return "", fmt.Errorf("unable to handle protocol %s, valid values are tcp, udp, all", ruleConfig.Protocol)
+	// Return if IP matched in rule
+	if ruleIPMatched {
+		resFmt := fmt.Sprintf("Your IP %s is already whitelisted for FromPort %d to ToPort %d.\n", ruleConfig.IP, ruleConfig.FromPort, ruleConfig.ToPort)
+		if ruleConfig.Protocol == "all" {
+			resFmt = fmt.Sprintf("Your IP %s is already whitelisted for all traffic.\n", ruleConfig.IP)
 		}
+		fmt.Print(resFmt)
+		return "", nil
 	}
 
 	// Define the new security group rule with the current IP
@@ -77,7 +54,7 @@ func ProcessRule(profile string, ruleConfig *configloader.SecurityGroupRule) (st
 	}
 
 	// Create rule if there is no matching rule for requested port
-	if len(matchingRules) == 0 {
+	if !ruleIPMatched && !ruleNameMatched {
 		res, err := allowIPPermission(ec2Client, &ruleConfig.SecurityGroupID, newRule, &ruleConfig.IP)
 		if err != nil {
 			return "", err
@@ -86,47 +63,107 @@ func ProcessRule(profile string, ruleConfig *configloader.SecurityGroupRule) (st
 		return "", nil
 	}
 
-	// If the rule with current public IP already exists else create the rule
-	for _, matchingRule := range matchingRules {
-		if *matchingRule.IpRanges[0].CidrIp == ruleConfig.IP {
-			resFmt := fmt.Sprintf("Your IP %s is already whitelisted for FromPort %d to ToPort %d.\n", ruleConfig.IP, ruleConfig.FromPort, ruleConfig.ToPort)
+	// Modify security group rule
+	if ruleNameMatched {
+		fmt.Println("Whitelisting your current IP...")
+		// Revoke old IP permission
+		res, err := revokeIPPermission(ec2Client, &ruleConfig.SecurityGroupID, newRule, *matchingRule.IpRanges[0].CidrIp)
+		if err != nil {
+			return "", err
+		}
+		fmt.Println(res)
+
+		// Allow new IP permission
+		res, err = allowIPPermission(ec2Client, &ruleConfig.SecurityGroupID, newRule, &ruleConfig.IP)
+		if err != nil {
+			return "", err
+		}
+		fmt.Println(res)
+
+		return "", nil
+	}
+
+	fmt.Println("Nothing to process")
+	return "", nil
+}
+
+// Get security group rules list
+func getSecurityGroupRules(ruleConfig *configloader.SecurityGroupRule) (*ec2.Client, []types.IpPermission, error) {
+
+	// Load AWS SDK configuration with specified profile and region
+	awsCfg, err := config.LoadDefaultConfig(context.TODO(),
+		config.WithSharedConfigProfile(ruleConfig.AWSProfile),
+		config.WithRegion(ruleConfig.Region),
+	)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// Create EC2 client and retrieve security group details
+	ec2Client := ec2.NewFromConfig(awsCfg)
+	describeInput := &ec2.DescribeSecurityGroupsInput{
+		GroupIds: []string{ruleConfig.SecurityGroupID},
+	}
+	securityGroup, err := ec2Client.DescribeSecurityGroups(context.TODO(), describeInput)
+	if err != nil {
+		return nil, nil, err
+	}
+	return ec2Client, securityGroup.SecurityGroups[0].IpPermissions, nil
+}
+
+// Filter Valid rules for the allowed port and protocol
+func getValidRules(ruleConfig *configloader.SecurityGroupRule, securityGroupRules *[]types.IpPermission) ([]types.IpPermission, error) {
+	var matchingRules []types.IpPermission
+	for _, rule := range *securityGroupRules {
+		protocol := derefString(rule.IpProtocol) // Convert *string to string safely
+
+		switch {
+		case protocol == "-1":
+			// "all" protocol means all traffic, represented by "-1" in AWS security rules
 			if ruleConfig.Protocol == "all" {
-				resFmt = fmt.Sprintf("Your IP %s is already whitelisted for all traffic.", ruleConfig.IP)
+				matchingRules = append(matchingRules, rule)
+				return matchingRules, nil
 			}
-			fmt.Print(resFmt)
-			return "", nil
-		} else {
-			res, err := allowIPPermission(ec2Client, &ruleConfig.SecurityGroupID, newRule, &ruleConfig.IP)
-			if err != nil {
-				return "", err
+
+		case protocol == "tcp" || protocol == "udp":
+			// Validate TCP and UDP rules against ruleConfig
+			if protocol == ruleConfig.Protocol &&
+				derefInt(rule.FromPort) == ruleConfig.FromPort &&
+				derefInt(rule.ToPort) == ruleConfig.ToPort {
+
+				matchingRules = append(matchingRules, rule)
+				return matchingRules, nil
 			}
-			fmt.Println(res)
-			return "", nil
+
+		default:
+			return nil, fmt.Errorf("unable to handle protocol %s, valid values are tcp, udp, all", ruleConfig.Protocol)
 		}
 	}
+	return matchingRules, nil
+}
 
-	// Remove and Add rule if port and rule name matches with requested rule but whitelisted IP in rule is different
-	for _, matchingRule := range matchingRules {
-		if derefString(matchingRule.IpRanges[0].Description) == ruleConfig.RuleName && derefString(matchingRule.IpRanges[0].CidrIp) != ruleConfig.IP {
-			fmt.Println("Whitelisting your current IP...")
-			// Revoke old IP permission
-			res, err := revokeIPPermission(ec2Client, &ruleConfig.SecurityGroupID, newRule, *matchingRule.IpRanges[0].CidrIp)
-			if err != nil {
-				return "", err
-			}
-			fmt.Println(res)
+// Get matching rule for IP and Rule name
+func getMatchingRule(ruleConfig *configloader.SecurityGroupRule, validRules *[]types.IpPermission) (bool, bool, types.IpPermission) {
+	var matchingRule types.IpPermission
+	var ruleIPMatched, ruleNameMatched bool
 
-			// Allow new IP permission
-			res, err = allowIPPermission(ec2Client, &ruleConfig.SecurityGroupID, newRule, &ruleConfig.IP)
-			if err != nil {
-				return "", err
+	for _, rule := range *validRules {
+		for _, ipRange := range rule.IpRanges {
+			matchingRule = rule
+			if derefString(ipRange.CidrIp) == ruleConfig.IP {
+				ruleIPMatched = true
+				matchingRule.IpRanges = []types.IpRange{ipRange}
 			}
-			fmt.Println(res)
-		} else {
-			return "Nothing to modify", nil
+			if derefString(ipRange.Description) == ruleConfig.RuleName {
+				ruleNameMatched = true
+				matchingRule.IpRanges = []types.IpRange{ipRange}
+			}
+		}
+		if ruleIPMatched || ruleNameMatched {
+			break
 		}
 	}
-	return "Nothing to process", nil
+	return ruleIPMatched, ruleNameMatched, matchingRule
 }
 
 // Helper function to safely dereference an *int pointer

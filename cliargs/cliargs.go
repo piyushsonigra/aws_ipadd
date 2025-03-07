@@ -32,6 +32,7 @@ func customUsage() {
 	fmt.Println("  --rule_name <string>   Security group rule name (optional)")
 }
 
+// Parse CLI Arguments
 func ParseArgs() *Args {
 	args := &Args{}
 	flag.Usage = customUsage
