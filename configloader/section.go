@@ -12,6 +12,7 @@ const (
 	configFilePath = "%s/.aws_ipadd/aws_ipadd"
 )
 
+// Get config file from env var or default
 func getConfigFile() string {
 	// Check if a custom config file path is provided via environment variable
 	customPath := os.Getenv("CUSTOM_AWS_IPADD_CONFIG_FILE")
@@ -23,6 +24,7 @@ func getConfigFile() string {
 	return fmt.Sprintf(configFilePath, os.Getenv("HOME"))
 }
 
+// Get profile section from config file
 func GetSection(profile string) (*ini.Section, error) {
 	configFilePath := getConfigFile()
 	loadConfig, err := ini.Load(configFilePath)
