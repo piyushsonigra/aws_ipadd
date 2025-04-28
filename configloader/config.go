@@ -70,9 +70,9 @@ func GetConfig(section *ini.Section, args *cliargs.Args) (*SecurityGroupRule, er
 
 	// Set rule name
 	if args.RuleName != "" {
-		rule.RuleName = args.RuleName
+		rule.RuleName = strings.TrimSpace(args.RuleName)
 	} else {
-		rule.RuleName = section.Key("rule_name").String()
+		rule.RuleName = strings.TrimSpace(section.Key("rule_name").String())
 	}
 
 	return rule, nil
