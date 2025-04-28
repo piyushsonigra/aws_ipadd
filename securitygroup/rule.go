@@ -65,16 +65,18 @@ func ProcessRule(profile string, ruleConfig *configloader.SecurityGroupRule) (st
 
 	// Modify security group rule
 	if ruleNameMatched {
-		fmt.Println("Whitelisting your current IP...")
 		// Revoke old IP permission
-		res, err := revokeIPPermission(ec2Client, &ruleConfig.SecurityGroupID, newRule, *matchingRule.IpRanges[0].CidrIp)
-		if err != nil {
-			return "", err
+		if ruleConfig.RuleName != "" {
+			fmt.Println("Updating your current IP...")
+			res, err := revokeIPPermission(ec2Client, &ruleConfig.SecurityGroupID, newRule, *matchingRule.IpRanges[0].CidrIp)
+			if err != nil {
+				return "", err
+			}
+			fmt.Println(res)
 		}
-		fmt.Println(res)
 
 		// Allow new IP permission
-		res, err = allowIPPermission(ec2Client, &ruleConfig.SecurityGroupID, newRule, &ruleConfig.IP)
+		res, err := allowIPPermission(ec2Client, &ruleConfig.SecurityGroupID, newRule, &ruleConfig.IP)
 		if err != nil {
 			return "", err
 		}

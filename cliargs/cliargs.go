@@ -6,6 +6,9 @@ import (
 	"os"
 )
 
+// Version will be set during build time
+var Version = "dev"
+
 // Args stores command-line arguments.
 type Args struct {
 	Profile  string
@@ -30,12 +33,19 @@ func customUsage() {
 	fmt.Println("  --protocol <int>       Protocol e.g TCP, UPD, all (optional)")
 	fmt.Println("  --ip <string>          IP address with subnetmask e.g '10.10.19.1/32' (optional)")
 	fmt.Println("  --rule_name <string>   Security group rule name (optional)")
+	fmt.Println("  --help, -h <string>    Show help")
+	fmt.Println("  --version, -v <string> Show aws_ipadd version")
 }
 
 // Parse CLI Arguments
 func ParseArgs() *Args {
 	args := &Args{}
 	flag.Usage = customUsage
+
+	// Add version flag
+	versionFlag := flag.Bool("version", false, "Show aws_ipadd version")
+	// Add short version flag
+	vShort := flag.Bool("v", false, "Show aws_ipadd version")
 
 	flag.StringVar(&args.Profile, "profile", "", "AWS profile name (required)")
 	flag.StringVar(&args.Port, "port", "", "Port number, this will be ignored if from_port and to_port is passed (optional)")
@@ -47,6 +57,13 @@ func ParseArgs() *Args {
 
 	flag.Parse()
 
+	// Check for version
+	if *versionFlag || *vShort {
+		fmt.Printf("aws_ipadd version %s\n", Version)
+		os.Exit(0)
+	}
+
+	// Check for profile
 	if args.Profile == "" {
 		fmt.Println("Error: --profile is required")
 		flag.Usage()
